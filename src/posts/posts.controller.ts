@@ -1,27 +1,30 @@
 import {
   Controller,
   Get,
-  Post,
   Put,
+  Post as PostMethod,
   Delete,
   Body,
   Param,
   Request,
   UseGuards,
+  ParseIntPipe,
 } from '@nestjs/common';
 import { PostsService } from './posts.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { Post } from './posts.entity';
 
 @Controller('posts')
 export class PostsController {
   constructor(private readonly postsService: PostsService) {}
 
   @UseGuards(JwtAuthGuard)
-  @Post()
+  @PostMethod()
   async createPost(
     @Body() body: { title: string; content: string },
     @Request() req,
   ) {
+    console.log(req)
     return this.postsService.createPost(body.title, body.content, req.user);
   }
 
@@ -33,6 +36,11 @@ export class PostsController {
   @Get(':id')
   async findById(@Param('id') id: number) {
     return this.postsService.findById(id);
+  }
+
+  @Get('user/:userId')
+  async getPostsByUserId(@Param('userId') userId: number): Promise<Post[]> {
+    return this.postsService.findByUserId(userId);
   }
 
   @UseGuards(JwtAuthGuard)

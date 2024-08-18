@@ -11,7 +11,17 @@ import { Post } from './posts/posts.entity';
 
 @Module({
   imports: [
-    ConfigModule.forRoot(),
+    ConfigModule.forRoot({
+      isGlobal: true,
+    }),
+    JwtModule.registerAsync({
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: (configService: ConfigService) => ({
+        secret: configService.get<string>('JWT_SECRET'),
+        signOptions: { expiresIn: '1h' },
+      }),
+    }),
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
@@ -28,10 +38,6 @@ import { Post } from './posts/posts.entity';
     }),
     UsersModule,
     PostsModule,
-    JwtModule.forRoot({
-      secret: 'your-jwt-secret', // Replace with your secret
-      signOptions: { expiresIn: '1h' },
-    }),
     AuthModule,
   ],
 })
